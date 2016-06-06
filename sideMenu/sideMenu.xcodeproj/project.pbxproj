@@ -11,6 +11,7 @@
 		34CE27421CFDE15E003A3004 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34CE27401CFDE15E003A3004 /* Main.storyboard */; };
 		34CE27441CFDE15E003A3004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 34CE27431CFDE15E003A3004 /* Assets.xcassets */; };
 		34CE27471CFDE15E003A3004 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34CE27451CFDE15E003A3004 /* LaunchScreen.storyboard */; };
+		34D1B8EE1D05970600489AE2 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B8ED1D05970600489AE2 /* TableViewController.swift */; };
 		34E5150F1CFF3B6B0036BDC0 /* ASCMenuView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 34E5150E1CFF3B6B0036BDC0 /* ASCMenuView.xib */; };
 		34E515121CFF3CD30036BDC0 /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E515111CFF3CD30036BDC0 /* UIView+Extension.swift */; };
 		34E515191D0043DD0036BDC0 /* ASCMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E515141D0043DD0036BDC0 /* ASCMenuView.swift */; };
@@ -26,6 +27,7 @@
 		34CE27431CFDE15E003A3004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		34CE27461CFDE15E003A3004 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		34CE27481CFDE15E003A3004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		34D1B8ED1D05970600489AE2 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		34E5150E1CFF3B6B0036BDC0 /* ASCMenuView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ASCMenuView.xib; sourceTree = "<group>"; };
 		34E515111CFF3CD30036BDC0 /* UIView+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 		34E515141D0043DD0036BDC0 /* ASCMenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ASCMenuView.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 				34E5150E1CFF3B6B0036BDC0 /* ASCMenuView.xib */,
 				34E5151D1D0045FB0036BDC0 /* MenuTableView.swift */,
 				34E5151F1D0047E30036BDC0 /* ViewController.swift */,
+				34D1B8ED1D05970600489AE2 /* TableViewController.swift */,
 			);
 			path = sideMenu;
 			sourceTree = "<group>";
@@ -168,6 +171,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34E515201D0047E30036BDC0 /* ViewController.swift in Sources */,
+				34D1B8EE1D05970600489AE2 /* TableViewController.swift in Sources */,
 				34E5151E1D0045FB0036BDC0 /* MenuTableView.swift in Sources */,
 				34E5151B1D0043DD0036BDC0 /* ASCMenuViewController.swift in Sources */,
 				34CE273D1CFDE15E003A3004 /* AppDelegate.swift in Sources */,

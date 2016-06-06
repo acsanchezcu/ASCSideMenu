@@ -9,12 +9,12 @@
 import UIKit
 
 class ViewController: ASCMenuViewController {
+    
+    var menuConfiguration : MenuConfiguration?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let menuTableView = MenuTableView.init()
-        
-        initMenuConfiguration(MenuConfiguration(menuWidth: 300.0, menuSide: .Left, menuMode: .BehindNavigationView, menuView: menuTableView))
+        initMenuConfiguration(menuConfiguration!)
     }
 }

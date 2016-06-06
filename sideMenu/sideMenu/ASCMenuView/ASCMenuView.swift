@@ -13,8 +13,8 @@ class ASCMenuView: UIView {
     var view: UIView!
     
     var menuWidth: CGFloat?
-    var menuSide: ASCMenuViewController.MenuSide?
-    var menuMode: ASCMenuViewController.MenuMode?
+    var menuSide: MenuSide?
+    var menuMode: MenuMode?
     var menuView: UIView?
     
     //MARK: - Init
@@ -31,7 +31,7 @@ class ASCMenuView: UIView {
         super.init(coder: aDecoder)
     }
     
-    convenience init(menuConfiguration: ASCMenuViewController.MenuConfiguration) {
+    convenience init(menuConfiguration: MenuConfiguration) {
         self.init(frame:CGRect.zero)
         
         self.menuView = menuConfiguration.menuView

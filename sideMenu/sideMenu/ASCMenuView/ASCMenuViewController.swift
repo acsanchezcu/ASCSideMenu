@@ -8,26 +8,28 @@
 
 import UIKit
 
+//MARK: - Properties
+
+enum MenuSide {
+    case Left
+    case Right
+}
+
+enum MenuMode {
+    case OverNavigationBar
+    case OverNavigationView
+    case BehindNavigationBar
+    case BehindNavigationView
+}
+
+struct MenuConfiguration {
+    let menuWidth: CGFloat
+    let menuSide: MenuSide
+    let menuMode: MenuMode
+    let menuView: UIView
+}
+
 class ASCMenuViewController: UIViewController {
-    
-    enum MenuSide {
-        case Left
-        case Right
-    }
-    
-    enum MenuMode {
-        case OverNavigationBar
-        case OverNavigationView
-        case BehindNavigationBar
-        case BehindNavigationView
-    }
-    
-    struct MenuConfiguration {
-        let menuWidth: CGFloat
-        let menuSide: MenuSide
-        let menuMode: MenuMode
-        let menuView: UIView
-    }
     
     var menuOriginCenterX : CGFloat = 0.0
     var lastTranslationX : CGFloat = 0.0
@@ -37,46 +39,57 @@ class ASCMenuViewController: UIViewController {
     let panRec = UIPanGestureRecognizer()
     let tapRec = UITapGestureRecognizer()
     
-    var leftConstraint: NSLayoutConstraint? {
+    var navigationBarSize : CGFloat {
         get {
-            
-            for constraint in (menuView?.constraints)! {
-                return constraint
-            }
-            
-            return NSLayoutConstraint.init()
-        }
-        set {
-            self.leftConstraint = newValue
+            return (navigationController?.navigationBar.frame.height)! + 20.0
         }
     }
     
     var menuView: ASCMenuView?
     
+    //MARK: - Init
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
     
+    override func viewWillDisappear(animated: Bool) {
+        if isMenuOpen {
+            openMenu(false)
+        } else {
+            menuView?.removeFromSuperview()
+        }
+    }
+    
+     //MARK: - Public Methods
+    
     func initMenuConfiguration(menuConfiguration: MenuConfiguration) {
         menuView = ASCMenuView.init(menuConfiguration: menuConfiguration)
-        
-        panRec.addTarget(self, action: #selector(ASCMenuViewController.handlePan(_:)))
-        tapRec.addTarget(self, action: #selector(ASCMenuViewController.handleTap(_:)))
         
         view.addGestureRecognizer(tapRec)
         
         switch menuConfiguration.menuMode {
         case .BehindNavigationView:
+            
+            panRec.addTarget(self, action: #selector(ASCMenuViewController.handleBehindPan(_:)))
+            tapRec.addTarget(self, action: #selector(ASCMenuViewController.handleBehindTap(_:)))
+            
             let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
             
             appDelegate.window?.addSubview(menuView!)
             
-            UIView.embedView(menuView!, size: CGSize.init(width: CGFloat.min, height: view.frame.height - (navigationController?.navigationBar.frame.height)! - 20), top: false, left: true, right: true, bottom: true)
+            UIView.embedView(menuView!, size: CGSize.init(width: CGFloat.min, height: view.frame.height - navigationBarSize), top: false, left: true, right: true, bottom: true)
             view.addGestureRecognizer(panRec)
             
             appDelegate.window?.sendSubviewToBack(menuView!)
+            
+            menuOriginCenterX = (navigationController?.view.center.x)!
             break
         case .BehindNavigationBar:
+            
+            panRec.addTarget(self, action: #selector(ASCMenuViewController.handleBehindPan(_:)))
+            tapRec.addTarget(self, action: #selector(ASCMenuViewController.handleBehindTap(_:)))
+            
             let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
             
             appDelegate.window?.addSubview(menuView!)
@@ -85,53 +98,69 @@ class ASCMenuViewController: UIViewController {
             navigationController?.view.addGestureRecognizer(panRec)
             
             appDelegate.window?.sendSubviewToBack(menuView!)
+            
+            menuOriginCenterX = (navigationController?.view.center.x)!
             break
-        case .OverNavigationBar:
+        case .OverNavigationBar, .OverNavigationView:
+            panRec.addTarget(self, action: #selector(ASCMenuViewController.handleOverPan(_:)))
+            tapRec.addTarget(self, action: #selector(ASCMenuViewController.handleOverTap(_:)))
             
             self.navigationController?.view.addSubview(menuView!)
             
-            UIView.embedView(menuView!, size: CGSize.init(width: menuConfiguration.menuWidth, height:CGFloat.min), top: true, left: true, right: false, bottom: true)
+            if menuConfiguration.menuMode == .OverNavigationBar {
+                menuView?.frame = CGRectMake(0, 0, menuConfiguration.menuWidth, view.frame.height)
+            } else {
+                menuView?.frame = CGRectMake(0, navigationBarSize, menuConfiguration.menuWidth, view.frame.height - navigationBarSize)
+            }
             
-//            UIView.embedView(menuView!)
+            menuOriginCenterX = (menuView?.center.x)!
             
-            menuView?.center.x = 0.0
+            menuView?.center.x = (menuView?.center.x)! - menuConfiguration.menuWidth
             
             navigationController?.view.addGestureRecognizer(panRec)
-            
-            self.navigationController?.view.sendSubviewToBack(menuView!)
-            break
-        default:
             break
         }
-        
-        menuOriginCenterX = (navigationController?.view.center.x)!
     }
     
-    func handlePan(recognizer:UIPanGestureRecognizer) {
+    func openMenu(open: Bool) {
+
+        let translation : CGFloat = (open) ? menuOriginCenterX + (menuView?.menuWidth)! : menuOriginCenterX
         
-//        let translationInView = (menuView?.menuMode == MenuMode.OverNavigationBar) ? navigationController?.view : self.view
+        UIView.animateWithDuration(0.3) {
+            let menuMode = self.menuView?.menuMode
+            
+            if menuMode == .BehindNavigationBar {
+                self.navigationController?.view.center.x = translation
+            } else if menuMode == .BehindNavigationView{
+                self.view.center.x = translation
+            } else if menuMode == .OverNavigationBar || menuMode == .OverNavigationView {
+                self.menuView?.center.x = (open) ? self.menuOriginCenterX : self.menuOriginCenterX - (self.menuView?.menuWidth)!
+            }
+        }
+    }
+    
+    //MARK: - Action Methods
+    
+    @IBAction func userDidTapMenuButton(sender: AnyObject) {
         
-        let translationInView = (menuView?.menuMode == MenuMode.OverNavigationBar) ? menuView! : self.view
+        isMenuOpen = !isMenuOpen
+        
+        openMenu(isMenuOpen)
+    }
+    
+    //MARK: - Handle Methods
+    
+    func handleBehindPan(recognizer:UIPanGestureRecognizer) {
+        
+        let translationInView = self.view
         
         let translation = recognizer.translationInView(translationInView)
         
-//        if menuView?.menuMode == .OverNavigationBar {
-//         
-//            leftConstraint?.constant += translation.x
-//            
-//            return
-//        }
-        
-//        print(translation)
-        
-//        print("origin \(navigationController?.view.frame.origin.x)")
         print("center \(navigationController?.view.center.x)")
-//        print("translation x \(translation.x)")
-        
         
         if let view = recognizer.view {
             view.center = CGPoint(x:(view.center.x + translation.x < menuOriginCenterX) ? menuOriginCenterX : view.center.x + translation.x,
-                                  y:view.center.y)
+                                      y:view.center.y)
         }
     
         if recognizer.state == .Ended {
@@ -143,15 +172,7 @@ class ASCMenuViewController: UIViewController {
                 UIView.animateWithDuration(0.2, animations: {
                     view.center.x = (self.isMenuOpen) ? self.menuOriginCenterX + (self.menuView?.menuWidth)! : self.menuOriginCenterX;
                 })
-                
-                
-                
-//                openMenu(isMenuOpen)
             }
-            
-//            UIView.animateWithDuration(0.3) {
-//                recognizer.setTranslation(CGPointZero, inView: navigationController?.view)
-//            }
         }
         else {
             
@@ -159,12 +180,9 @@ class ASCMenuViewController: UIViewController {
             
             recognizer.setTranslation(CGPointZero, inView: translationInView)
         }
-        
-        
     }
     
-    func handleTap(recognizer:UIPanGestureRecognizer) {
-        
+    func handleBehindTap(recognizer:UIPanGestureRecognizer) {
         if isMenuOpen {
             isMenuOpen = false
             
@@ -172,36 +190,45 @@ class ASCMenuViewController: UIViewController {
         }
     }
     
-    @IBAction func userDidTapMenuButton(sender: AnyObject) {
+    func handleOverPan(recognizer:UIPanGestureRecognizer) {
         
-        isMenuOpen = !isMenuOpen
+//        if recognizer.state == .Began {
+//            if menuView?.menuMode == MenuMode.OverNavigationBar {
+//                self.navigationController?.view.bringSubviewToFront(menuView!)
+//            }
+//        }
         
-        openMenu(isMenuOpen)
+        let translationInView = (menuView?.menuMode == MenuMode.OverNavigationBar) ? menuView! : self.view
+        
+        let translation = recognizer.translationInView(translationInView)
+        
+        print("center \(menuView?.center.x)")
+
+        menuView?.center = CGPoint(x: (menuView?.center.x)! + translation.x, y: (menuView?.center.y)!)
+        
+        if recognizer.state == .Ended {
+                isMenuOpen = (((menuView?.center.x)! - menuOriginCenterX) > (menuView?.menuWidth)! / 4 && lastTranslationX > -15) || lastTranslationX > 15.0
+                
+                lastTranslationX = 0.0
+                
+                UIView.animateWithDuration(0.2, animations: {
+                    self.menuView?.center.x = (self.isMenuOpen) ? self.menuOriginCenterX : self.menuOriginCenterX - (self.menuView?.menuWidth)!;
+                })
+        }
+        else {
+            
+            lastTranslationX = translation.x
+            
+            recognizer.setTranslation(CGPointZero, inView: translationInView)
+        }
     }
     
-    func openMenu(open: Bool) {
+    func handleOverTap(recognizer:UIPanGestureRecognizer) {
         
-        if menuView?.menuMode == MenuMode.OverNavigationBar {
-            navigationController?.view.bringSubviewToFront(menuView!)
-        }
-        
-        let translation : CGFloat = (open) ? menuOriginCenterX + (menuView?.menuWidth)! : menuOriginCenterX
-        
-        UIView.animateWithDuration(0.3, animations: { 
-            let menuMode = self.menuView?.menuMode
+        if isMenuOpen {
+            isMenuOpen = false
             
-            if menuMode == .BehindNavigationBar {
-                self.navigationController?.view.center.x = translation
-            } else if menuMode == .BehindNavigationView{
-                self.view.center.x = translation
-            } else if menuMode == .OverNavigationBar {
-                self.menuView?.center.x = (open) ? 400.0 : -self.menuOriginCenterX
-            }
-            
-            }) { (completion) in
-                if self.menuView?.menuMode == MenuMode.OverNavigationBar && !open {
-                    self.navigationController?.view.sendSubviewToBack(self.menuView!)
-                }
+            openMenu(isMenuOpen)
         }
     }
 }
