@@ -165,8 +165,17 @@ class ASCMenuViewController: UIViewController {
         print("center \(navigationController?.view.center.x)")
         
         if let view = recognizer.view {
-            view.center = CGPoint(x:(view.center.x + translation.x < menuOriginCenterX) ? menuOriginCenterX : view.center.x + translation.x,
-                                      y:view.center.y)
+            var pointX: CGFloat = 0.0
+            
+            if view.center.x + translation.x < menuOriginCenterX {
+                pointX = menuOriginCenterX
+            } else if view.center.x + translation.x > menuOriginCenterX + (menuView?.menuWidth)! {
+                pointX = menuOriginCenterX + (menuView?.menuWidth)!
+            } else {
+                pointX = view.center.x + translation.x
+            }
+            
+            view.center = CGPoint(x:pointX, y:view.center.y)
         }
     
         if recognizer.state == .Ended {
