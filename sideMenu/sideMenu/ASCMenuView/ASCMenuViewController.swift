@@ -55,10 +55,14 @@ class ASCMenuViewController: UIViewController {
     
     override func viewWillDisappear(animated: Bool) {
         if isMenuOpen {
-            openMenu(false)
-        } else {
-            menuView?.removeFromSuperview()
+            openMenu(false, animated: false, completion: { (completion) in
+                
+            })
         }
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        menuView?.removeFromSuperview()
     }
     
      //MARK: - Public Methods
@@ -122,11 +126,13 @@ class ASCMenuViewController: UIViewController {
         }
     }
     
-    func openMenu(open: Bool) {
+    func openMenu(open: Bool, animated: Bool, completion: ((Bool) -> Void)?) {
 
         let translation : CGFloat = (open) ? menuOriginCenterX + (menuView?.menuWidth)! : menuOriginCenterX
         
-        UIView.animateWithDuration(0.3) {
+        let timeDuration = animated ? 0.3 : 0.0
+        
+        UIView.animateWithDuration(timeDuration) {
             let menuMode = self.menuView?.menuMode
             
             if menuMode == .BehindNavigationBar {
@@ -145,7 +151,7 @@ class ASCMenuViewController: UIViewController {
         
         isMenuOpen = !isMenuOpen
         
-        openMenu(isMenuOpen)
+        openMenu(isMenuOpen, animated: true, completion: nil)
     }
     
     //MARK: - Handle Methods
@@ -186,28 +192,29 @@ class ASCMenuViewController: UIViewController {
         if isMenuOpen {
             isMenuOpen = false
             
-            openMenu(isMenuOpen)
+            openMenu(isMenuOpen, animated: true, completion: nil)
         }
     }
     
     func handleOverPan(recognizer:UIPanGestureRecognizer) {
-        
-//        if recognizer.state == .Began {
-//            if menuView?.menuMode == MenuMode.OverNavigationBar {
-//                self.navigationController?.view.bringSubviewToFront(menuView!)
-//            }
-//        }
-        
         let translationInView = (menuView?.menuMode == MenuMode.OverNavigationBar) ? menuView! : self.view
         
         let translation = recognizer.translationInView(translationInView)
         
         print("center \(menuView?.center.x)")
+        
+        var pointX: CGFloat = 0.0
+        
+        if (menuView?.center.x)! + translation.x > menuOriginCenterX {
+            pointX = menuOriginCenterX
+        } else {
+            pointX = (menuView?.center.x)! + translation.x
+        }
 
-        menuView?.center = CGPoint(x: (menuView?.center.x)! + translation.x, y: (menuView?.center.y)!)
+        menuView?.center = CGPoint(x: pointX, y: (menuView?.center.y)!)
         
         if recognizer.state == .Ended {
-                isMenuOpen = (((menuView?.center.x)! - menuOriginCenterX) > (menuView?.menuWidth)! / 4 && lastTranslationX > -15) || lastTranslationX > 15.0
+                isMenuOpen = (((menuView?.center.x)! + menuOriginCenterX) > (menuView?.menuWidth)! / 4 && lastTranslationX > -15) || lastTranslationX > 15.0
                 
                 lastTranslationX = 0.0
                 
@@ -228,8 +235,7 @@ class ASCMenuViewController: UIViewController {
         if isMenuOpen {
             isMenuOpen = false
             
-            openMenu(isMenuOpen)
+            openMenu(isMenuOpen, animated: true, completion: nil)
         }
     }
 }
-
